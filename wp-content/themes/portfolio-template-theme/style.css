@@ -5962,3 +5962,24 @@ body.practice-fullscreen-open .practice-video__icon--collapse {
     overflow-wrap: anywhere;
   }
 }
+
+/* ===== 视频全屏修复 v13（2026-09-09）：只在全屏态生效，平时渲染零改动 =====
+ * 症状：点放大后全屏黑屏、视频缩在左上角小块（PC、手机全屏按钮都走同一套逻辑）。
+ * 根因：JS 量好写死的内联宽高（fitVideo）在进入全屏后没人重算，视频保持轮播里的尺寸。
+ * 做法：全屏态下容器铺满视口、视频按 contain 完整呈现不裁切；退出全屏时 JS 派发 resize
+ *       让 fitVideo 重新按轮播几何量尺寸。
+ */
+.practice-slide__media.practice-video:fullscreen,
+.practice-slide__media.practice-video:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.practice-slide__media.practice-video:fullscreen video,
+.practice-slide__media.practice-video:-webkit-full-screen video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  transform: none;
+}

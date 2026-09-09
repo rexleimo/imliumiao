@@ -667,6 +667,13 @@
             try { window.history.scrollRestoration = restoreScrollRestoration || 'auto'; } catch (error) {}
           }, 260);
         }
+        if (!active && wasFullscreen && fromFullscreenChange) {
+          // Exiting fullscreen leaves the video sized for the fullscreen
+          // geometry: nudge resize listeners so the video fit is re-measured
+          // against the carousel, now and once more after layout settles.
+          window.dispatchEvent(new Event('resize'));
+          window.setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 180);
+        }
         if (active) fullscreenWasActive = true;
         else if (fromFullscreenChange && wasFullscreen) fullscreenWasActive = false;
         wrap.classList.toggle('is-fullscreen', active);
