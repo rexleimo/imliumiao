@@ -713,6 +713,7 @@ main {
 
   .page {
     height: auto;
+    min-height: 100vh;
     min-height: 100svh;
     min-height: 100dvh;
     overflow: visible;
@@ -813,7 +814,9 @@ main {
   }
 
   .hero {
+    min-height: calc(100vh - 74px);
     min-height: calc(100svh - 74px);
+    height: calc(100vh - 74px);
     height: calc(100svh - 74px);
     padding: 20px 20px 64px;
   }
@@ -824,6 +827,7 @@ main {
   }
 
   .stats {
+    top: calc(100vh + 2px);
     top: calc(100svh + 2px);
     flex-direction: column;
     justify-content: center;
@@ -5260,6 +5264,7 @@ body.practice-fullscreen-open .practice-video__icon--collapse {
   }
 
   .portfolio-content {
+    overflow-x: hidden;
     overflow-x: clip;
   }
 
@@ -5416,6 +5421,7 @@ body.practice-fullscreen-open .practice-video__icon--collapse {
   }
 
   .statement-section {
+    min-height: 48rem;
     min-height: min(100dvh, 48rem);
   }
 
@@ -5458,11 +5464,14 @@ body.practice-fullscreen-open .practice-video__icon--collapse {
   }
 
   .bottle-section {
+    min-height: 135vh;
     min-height: 135dvh;
   }
 
   .bottle-stage {
+    min-height: 100vh;
     min-height: 100svh;
+    height: 100vh;
     height: 100svh;
   }
 
@@ -5812,6 +5821,7 @@ body.practice-fullscreen-open .practice-video__icon--collapse {
 
   /* 双环（INSPIRATIONS）：外圈半径继续放大，允许图片超出屏幕边界，避免拥挤 */
   .bottle-section {
+    min-height: 108vh;
     min-height: 108dvh;
   }
 
@@ -5875,5 +5885,80 @@ body.practice-fullscreen-open .practice-video__icon--collapse {
 @media (min-width: 901px) {
   .practice-slide--video .practice-slide__media {
     overflow: hidden;
+  }
+}
+
+/* ===== 移动端重叠修复 v12（2026-09-09）：v11 + iOS 15 兼容兜底，仅手机视口生效，PC 端零改动 =====
+ * 症状：移动端案例区出现标题压住说明文字、图片盖住卡片正文、卡片之间互叠。
+ * 根因：视觉盒高度同时依赖 aspect-ratio 与后代 height:100% 反推，在 iOS WebKit 下出现
+ *       循环高度歧义；ID 选择器的 3:2 比例覆盖了手机端的 16/10；长标题 nowrap 顶出横向溢出。
+ * 做法：统一手机端视觉比例、图片改为绝对填充（盒高度只由 aspect-ratio 决定）、每张卡片独立
+ *       层叠上下文且正文层级高于图片、说明文字允许换行不断裂。全部规则都在 max-width 内，PC 不受影响。
+ */
+@media (max-width: 900px) {
+  .cases-section {
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  .cases-heading h2 {
+    overflow-wrap: anywhere;
+  }
+
+  .section-note {
+    overflow-wrap: anywhere;
+  }
+
+  .case-list {
+    isolation: isolate;
+  }
+
+  .case-card {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .case-card > * {
+    min-width: 0;
+  }
+
+  .case-card__body {
+    position: relative;
+    z-index: 1;
+  }
+
+  .case-card__visual {
+    position: relative;
+    z-index: 0;
+    overflow: hidden;
+    /* iOS 15 首版 aspect-ratio 不稳时的保底高度：正常按比例算出约 12rem，此行不生效 */
+    min-height: 10rem;
+  }
+
+  /* 五张卡片在手机端统一为 16/10：ID 选择器优先级高于类，必须逐个覆盖 */
+  #case-aiot .case-card__visual,
+  #case-charging .case-card__visual,
+  #case-assistant .case-card__visual,
+  #case-web .case-card__visual,
+  #case-app .case-card__visual {
+    aspect-ratio: 16 / 10;
+  }
+
+  /* 图片绝对填充：视觉盒高度完全由 aspect-ratio 决定，不再依赖后代高度反推 */
+  .case-card__visual-link {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+
+  .case-card__visual img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .case-card__body h3 {
+    overflow-wrap: anywhere;
   }
 }
