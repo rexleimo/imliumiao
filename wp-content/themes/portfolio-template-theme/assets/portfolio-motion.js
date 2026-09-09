@@ -412,6 +412,8 @@
 
     function startPracticeAutoplay() {
       if (reduceMotion || autoplayFrame || !carouselInView) return;
+      // 手机端（触屏设备）禁止自动轮播，仅支持手动滑动切换；PC 端保持原自动轮播
+      if (window.matchMedia && window.matchMedia('(max-width: 900px), (hover: none), (pointer: coarse)').matches) return;
       autoplayFrame = window.requestAnimationFrame(advancePracticeAutoplay);
     }
 
@@ -1007,4 +1009,61 @@
     canvas.addEventListener('pointerup', finishResumeDrag);
     canvas.addEventListener('pointercancel', finishResumeDrag);
   });
+}());
+
+/*
+ * 移动端自适应修复（2026-09-08，2026-09-09 第8轮修订）
+ * 手机端（触屏/粗指针）：滑到练习轮播页视频自动播放（轮播不自动，仅手动切换）；
+ * 播放时控件隐藏，点击视频画面显示控件（进度条/音量/全屏），点击视频以外区域隐藏。
+ */
+(function () {
+  if (!window.matchMedia || !window.matchMedia('(max-width: 900px), (hover: none), (pointer: coarse)').matches) return;
+  var wrap = document.querySelector('.practice-slide--video [data-practice-video-wrap]');
+  var video = wrap && wrap.querySelector('[data-practice-video]');
+  if (!wrap || !video) return;
+  var playButton = wrap.querySelector('[data-practice-video-play]');
+  function syncMobileState() {
+    wrap.classList.toggle('is-playing', !video.paused);
+    if (playButton) playButton.setAttribute('aria-label', video.paused ? '播放视频' : '暂停视频');
+  }
+  var watcher = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        if (video.paused) video.play().catch(function () {});
+      } else if (!video.paused) {
+        video.pause();
+      }
+      syncMobileState();
+    });
+  }, { threshold: 0.6 });
+  watcher.observe(wrap);
+  // 交互：点击视频画面 → 显示控件；点击视频以外 → 隐藏
+  wrap.addEventListener('click', function () {
+    wrap.classList.add('is-controls-visible');
+  });
+  document.addEventListener('click', function (e) {
+    if (!wrap.contains(e.target)) wrap.classList.remove('is-controls-visible');
+  });
+}());
+
+/*
+ * 第10轮（2026-09-09）：视频填满容器（16:9 内容 cover 裁切），消除 PC/手机四周黑边
+ */
+(function () {
+  var wrap = document.querySelector('.practice-slide--video [data-practice-video-wrap]');
+  var video = wrap && wrap.querySelector('[data-practice-video]');
+  if (!wrap || !video) return;
+  function fitVideo() {
+    var media = wrap.parentElement;
+    if (!media) return;
+    var mw = media.clientWidth, mh = media.clientHeight;
+    if (mw > 0 && mh > 0) {
+      video.style.width = mw + 'px';
+      video.style.height = mh + 'px';
+    }
+  }
+  fitVideo();
+  window.addEventListener('resize', fitVideo);
+  setTimeout(fitVideo, 300);
+  setTimeout(fitVideo, 1200);
 }());

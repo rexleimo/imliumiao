@@ -3048,7 +3048,7 @@ body {
 
 .practice-video video {
   object-fit: cover;
-  transform: scale(1.015);
+  transform: scale(1.02);
   transform-origin: center;
 }
 
@@ -4464,7 +4464,7 @@ body.practice-fullscreen-open {
   z-index: 1;
   display: grid;
   justify-items: center;
-  width: min(420px, calc(100vw - 2rem));
+  width: min(420px, 100%);
   gap: 1rem;
   padding: 2rem;
   border: 1px solid rgba(20, 20, 20, .12);
@@ -4506,6 +4506,8 @@ body.practice-fullscreen-open {
   width: min(100%, 260px);
   height: auto;
   border-radius: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .contact-modal__copy {
@@ -5607,3 +5609,271 @@ body.practice-fullscreen-open .practice-video__icon--collapse {
 }
 }
 
+/*
+ * 移动端自适应修复（2026-09-08）
+ * 仅作用于 max-width:900px / 560px 的手机视口；PC 端（>900px）完全不生效，
+ * 其余区块、样式与逻辑保持不变。
+ * 覆盖点：首屏背景兜底、导航按钮统一尺寸、案例导航条（滑动条）改到标题下、
+ *         statement 英文两行与中文字号、双环半径与间距、练习轮播高度统一/
+ *         箭头浮起/视频黑边、轮播区域垂直下滑。
+ */
+@media (max-width: 900px) {
+  /* 首屏：手机端视频区域以纯黑兜底，起播前/失败时不再露出电脑图 poster */
+  .hero-photo {
+    background: #000;
+  }
+
+  /* 导航按钮统一尺寸：菜单按钮再次缩小（38px→32px），保持上下间距不变 */
+  .header .menu-toggle {
+    width: 32px;
+    height: 32px;
+    gap: 3px;
+  }
+
+  .header .menu-toggle span {
+    width: 11px;
+    height: 1.5px;
+  }
+
+  .menu-open .menu-toggle span:nth-child(1) {
+    transform: translateY(4.5px) rotate(45deg);
+  }
+
+  .menu-open .menu-toggle span:nth-child(3) {
+    transform: translateY(-4.5px) rotate(-45deg);
+  }
+
+  .header .header-cta {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  /* 第5轮：导航栏按钮统一——高度=Back(40px)、字号14px、宽度等比收窄 */
+  .detail-actions .btn {
+    height: 40px;
+    font-size: 14px;
+    line-height: 1;
+    padding-inline: 15px;
+  }
+
+  .site-nav .nav-link {
+    height: 52px;
+    font-size: 18px;
+  }
+
+  /* 案例导航条：按用户要求整体移除（PC 与手机端均不再显示进度条） */
+  .case-progress {
+    display: none;
+  }
+
+  /* 第9轮：手机端控件默认隐藏，点击视频画面才显示，点击外部隐藏 */
+  .practice-video.is-controls-visible .practice-video__audio,
+  .practice-video.is-controls-visible .practice-video__controls {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  /* 第7轮：手机端隐藏浏览器滚动条（右侧竖条），PC 端保留原样 */
+  html {
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  /* 练习轮播：后续图片与首屏视频高度统一（等比缩放，不裁切不拉伸）
+     视频两侧间距加倍（1rem → 2rem），内容与屏幕两侧更透气 */
+  .practice-slide:not(.practice-slide--video) .practice-slide__media {
+    height: calc((100vw - 4rem) * 9 / 16);
+  }
+
+  /* 视频去除黑边：手机端采用与 PC 一致的裁剪填充 */
+  .practice-slide--video video {
+    object-fit: cover;
+    background: #000;
+  }
+
+  /* 轮播区域允许垂直滑动页面，避免手机端在图片上无法下滑 */
+  .practice-viewport {
+    touch-action: pan-x pan-y;
+  }
+
+  /* 左右箭头：去掉背景圈与文字箭头（含中间横线），只保留纯三角形，
+     浮于视频垂直中心的左右两侧，不遮挡画面内容 */
+  .practice-carousel {
+    position: relative;
+  }
+
+  .practice-control--prev,
+  .practice-control--next {
+    position: absolute;
+    grid-row: auto;
+    grid-column: auto;
+    top: calc(50% - 1rem);
+    transform: translateY(-50%);
+    z-index: 4;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .practice-control--prev:hover,
+  .practice-control--next:hover {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    transform: translateY(-50%);
+  }
+
+  /* 箭头放在图片左右两侧的留白区、不压画面；与图片保持约 0.8rem 间距 */
+  .practice-control--prev {
+    left: -2rem;
+    justify-self: auto;
+  }
+
+  .practice-control--next {
+    right: -2rem;
+    justify-self: auto;
+  }
+
+  .practice-control--prev span,
+  .practice-control--next span {
+    display: none;
+  }
+
+  /* 细灰 chevron（自己画的 SVG 描边箭头，非图片），颜色与站点灰色统一，
+     尺寸小、不醒目，风格贴近参考图的细线条箭头 */
+  .practice-control--prev::after,
+  .practice-control--next::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 1.4rem auto;
+    pointer-events: none;
+    opacity: .9;
+  }
+
+  .practice-control--prev::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8a8a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15.5 17.5L8 12l7.5-5.5'/%3E%3C/svg%3E");
+  }
+
+  .practice-control--next::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8a8a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8.5 6.5L16 12l-7.5 5.5'/%3E%3C/svg%3E");
+  }
+}
+
+
+
+
+/*
+ * 手机端自适应修复 v2（2026-09-08，第二轮调整·修正版）
+ * PC 端完全保持原样，不做任何调整；以下规则全部仅作用于手机端。
+ */
+@media (max-width: 900px) {
+  /* 全局：中间内容与两侧间距加倍（1rem → 2rem），整体更透气 */
+  .section-shell {
+    width: min(calc(100% - 4rem), 42rem);
+  }
+
+  .statement-inner,
+  .bottle-content {
+    width: min(calc(100% - 4rem), 42rem);
+  }
+
+  /* 联系页文案：强制拆成两行，避免第二排只剩一个字 */
+  .contact-subtitle-line {
+    display: block;
+  }
+
+  /* statement 章节：中文标题在当前基础上再缩小 5%（原 10vw → 9.2vw） */
+  .statement-section .statement-focus__title .statement-focus__line--right {
+    font-size: clamp(1.84rem, 9.2vw, 3.13rem);
+  }
+
+  .statement-section .statement-copy {
+    max-width: 15.5rem;
+    line-height: 1.7;
+    text-align: center;
+  }
+
+  /* 双环（INSPIRATIONS）：外圈半径继续放大，允许图片超出屏幕边界，避免拥挤 */
+  .bottle-section {
+    min-height: 108dvh;
+  }
+
+  .bottle-orbit--inner {
+    --orbit-radius: 11.5rem;
+  }
+
+  .bottle-orbit--outer {
+    --orbit-radius: 20rem;
+  }
+
+  .bottle-orbit__item--inner {
+    width: 3.2rem;
+  }
+
+  .bottle-orbit__item--outer {
+    width: 4rem;
+  }
+
+  /* 手机端无拖拽/悬停功能，隐藏操作提示（PC 端保留） */
+  .practice-note {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  /* 练习轮播：首屏视频宽度与双倍侧边距一致（居中，两侧各留 2rem） */
+  .practice-slide--video {
+    width: calc(100vw - 4rem);
+  }
+
+  .cases-layout {
+    gap: 2.5rem;
+  }
+}
+
+/* ===== 第9轮-终（2026-09-09）：手机端视频填满容器+cover裁切，消除四周黑边，比例不变 ===== */
+@media (max-width: 900px) {
+  .practice-slide--video .practice-slide__media {
+    overflow: hidden;
+  }
+
+  .practice-slide--video video {
+    object-fit: cover;
+    transform: scale(1.02);
+    transform-origin: center;
+  }
+
+  .practice-video__controls {
+    left: .45rem;
+    right: .45rem;
+  }
+
+  .practice-video__audio {
+    top: .45rem;
+    left: .45rem;
+  }
+}
+
+/* ===== 第10轮（2026-09-09）：PC 端视频同样填满容器+cover裁切，消除上下黑线 ===== */
+@media (min-width: 901px) {
+  .practice-slide--video .practice-slide__media {
+    overflow: hidden;
+  }
+}
